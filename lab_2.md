@@ -45,7 +45,7 @@ You'll now use clock based scheduling to implement a simple real-time applicatio
 Make a schedule for the following tasks:
 τ1= (4,1), τ2= (5,1.5), τ3 = (20,1) , τ4 = (20,2)
 Mock each task by blocking for the appropriate amount of time with `embassy_time::block_for(Duration::from_millis(appropriate amount of time));`
-This just blocks for that length of time using the system timer. 
+This just blocks for that length of time using the system timer.
 
 Implement a non pre emptive clock driven scheduler to run these tasks. 
 This means that once a task is given the processor it runs to completion. 
@@ -53,6 +53,8 @@ We will assume that no blocking for resources is possible.
 A task will only block when it is waiting for its next execution.
 While each task is running it should light an LED (task 1 lights LED 1, task 2 lights LED 2, etc.)
 
+## Part 3 - Generic non-preemptive scheduling
+We will now genericize the clock based scheduler to make ordering determinations at runtime.
 You are to implement the following:
 
 1. A TCB struct (or struct of structs) that includes a task's priority, period, max execution time, run function, and remaining tics.
@@ -74,8 +76,8 @@ Your scheduler must be generic enough that if a new set of tasks was given, it c
 
 Commit your code and push it to github. Please make sure it builds.
 
-## Part 3 - Pre emptive scheduling with Embassy
-The goal is to run the clock driven schedule from part 2 in parallel with the async schedule from lab 1. The starter code for this lab
+## Part 4 - Pre emptive scheduling with Embassy
+The goal is to run the real time scheduler in parallel with the async IO processing from lab 1. The starter code for this lab
 includes a working solution of lab1 for reference. 
 
 To run preemptively we'll use two different executors, one thread mode, and one interrupt mode using IRQ 0. Determine the priorities for
