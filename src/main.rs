@@ -8,6 +8,7 @@ mod led_states;
 mod pending;
 mod wifi;
 
+use alloc::format;
 use alloc::string::String;
 use core::cell::RefCell;
 use cortex_m::peripheral::NVIC;
@@ -50,11 +51,16 @@ pub type UartChannel = Channel<CriticalSectionRawMutex, String, 10>;
 
 #[embassy_executor::task]
 pub async fn uart_sender(mut uart_tx: UartTx<'static, Async>) {
+    let mut count = 0;
+    let clear = "\x1Bc".as_bytes();
+    info!("clear {:x}", clear);
 
+    uart_tx.write(clear).await.unwrap();
     loop {
-        let data = [1u8, 2, 3, 4, 5, 6, 7, 8];
-        info!("TX {:?}", data);
-        uart_tx.write(&data).await.unwrap();
+        let data = format!("testy test {:00}\r", count);
+        count +=1;
+        info!("TX {:x}", data.as_bytes());
+        uart_tx.write(&data.as_bytes()).await.unwrap();
         Timer::after_secs(1).await;
     }
 }
@@ -68,8 +74,9 @@ async fn main(spawner: Spawner) {
         unsafe { HEAP.init(HEAP_MEM.as_ptr() as usize, HEAP_SIZE) }
     }
     let p = embassy_rp::init(Default::default());
-    let mut uart_tx = UartTx::<Async>::new(p.UART0, p.PIN_0, p.DMA_CH0, uart::Config::default());
+    let mut conf = uart::Config::default();
+    conf.baudrate = 115200;
+    let mut uart_tx = UartTx::<Async>::new(p.UART0, p.PIN_0, p.DMA_CH0, conf);
     spawner.spawn(uart_sender(uart_tx)).unwrap();
-
 
 }
